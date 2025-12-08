@@ -1,3 +1,4 @@
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -42,12 +43,10 @@ class Student {
 }
 
 public class Main {
-
         private static List<Student> students = new ArrayList<>();
     public static void main(String[] args) {
         int nextId = 1;
-        Connecion con = DStore.getconnectiom();
-        
+        Connection con = DStore.getConnection();
         Scanner sc = new Scanner(System.in);
         
         while (true) {
