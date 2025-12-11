@@ -3,51 +3,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-class Student {
-    int id;
-    int rollNo;
-    String name;
-    String faculty;
-    int age;
-    long contactNum;
+import Database.DBConnection;
+import Models.Student;
+import Models.StudentDAO;
 
-    public Student(int id, int rollNo, String name, String faculty, int age, long contatcNum){
-        this.id = id;
-        this.rollNo = rollNo;
-        this.name = name;
-        this.faculty = faculty; 
-        this.age = age;
-        this.contactNum = contatcNum;
-    }
-
-    void studentView(){
-        System.out.println("\n\t\t\t\t Student View Details\n");
-        System.out.println("Student ID: " + id);
-        System.out.println("Roll No: " + rollNo);
-        System.out.println("Name: " + name);
-        System.out.println("Course: " + faculty);
-        System.out.println("Age: " + age);
-        System.out.println("Contact Number: " + contactNum);
-
-    }
-
-    void UpdateStudent(int rollNo, String name, String faculty, int age, long contatcNum){
-        this.rollNo = rollNo;
-        this.name = name;
-        this.faculty = faculty; 
-        this.age = age;
-        this.contactNum = contatcNum;
-
-    }
-
-}
 
 public class Main {
-        private static List<Student> students = new ArrayList<>();
     public static void main(String[] args) {
-        int nextId = 1;
-        Connection con = DStore.getConnection();
         Scanner sc = new Scanner(System.in);
+
+        Connection con = DBConnection.getConnection();
+        try {
+            if (con != null) {
+                System.out.println("Connected to Database!");
+            } else {
+                System.out.println("Database Connection faild!");
+            }
+        } catch (Exception e) {
+                System.out.println("");
+        }
         
         while (true) {
             System.out.println("\n\t\t\t\t Home\n");
@@ -64,7 +38,7 @@ public class Main {
             case 1 -> {
 
                 System.out.println("\n\t\t\t\t Add Student\n");
-                System.out.println("Student ID: " + nextId);
+                System.out.println("Student ID: " + id);
 
                 System.out.print("Enter Roll No: ");
                 int roll = sc.nextInt();
@@ -74,103 +48,86 @@ public class Main {
                 String name = sc.nextLine();
                 
                 System.out.print("Enter Course: ");
-                String facul = sc.nextLine();
+                String faculty = sc.nextLine();
 
                 System.out.print("Enter Age: ");
                 int age = sc.nextInt();
 
                 System.out.print("Enter Contact Number: ");
-                long contact = sc.nextLong(); 
+                long contactNum = sc.nextLong(); 
 
-                Student s = new Student(nextId, roll, name, facul, age, contact);
-                students.add(s);
-                nextId++;
+                boolean ok = StudentDAO.addStudent (
+                    new Student(id, roll, name, faculty, age, contactNum)
 
+                );
 
-                System.out.println("Student Added Successfully!");
-                continue;
+                System.out.println(ok ? "Added!" : "Failed");
             }
 
             case 2 -> {
                 System.out.println("\n\t\t\t\t View Student\n");
                 System.out.print("Enter Student ID: ");
-                int checkId = sc.nextInt();
-                boolean found = false;
+                int id = sc.nextInt();
+                Student s = StudentDAO.getStudent(id);;
+                if(s != null){
+                    s.print;
+                } else {
+                    System.out.println("not found!");
+                }
 
-                for(Student st : students){
-                    if(st.id == checkId){
-                        found = true;
-                        st.studentView();
-                        break;
-                    }
-                }
-                if(!found){
-                    System.out.println("Student not found into the list!");
-                }
-                continue;
             }
 
             case 3 -> {
                 System.out.println("\n\t\t\t\t Update Student\n");
                 System.out.print("Enter Student ID: ");
-                int upCheck =  sc.nextInt();
-                boolean found = false;
+                int id = StudentDAO.getStudent(id)
+                sc.nextLine();
 
-                for(Student su : students){
-                    if(upCheck == su.id){
-                        found = true;
+                Student s = StudentDAO.getStudent(id);
+                if (s == null) {
+                    System.out.println("Not found!");
+                    break;
+                }
 
-                        System.out.print("Enter new Roll No: ");
-                        int newRoll = sc.nextInt();
-                        sc.nextLine();
+                System.out.print("Enter new Roll No: ");
+                s.setRollNo(sc.nextInt());
+                sc.nextLine();
+                    
+                System.out.print("New Name: ");
+                s.setName(sc.nextLine());
 
-                        System.out.print("Enter new Name: ");
-                        String newName = sc.nextLine();
-                        
-                        System.out.print("Enter new Course: ");
-                        String newFacul = sc.nextLine();
+                System.out.print("New Faculty: ");
+                s.setFacualty(sc.nextLine());
 
-                        System.out.print("Enter Age: ");
-                        int newAge = sc.nextInt();
+                System.out.print("New Age: ");
+                s.setAge(sc.nextInt());
 
-                        System.out.print("Enter New Contact No: ");
-                        long newContact = sc.nextLong();
+                System.out.print("New Contact: ");
+                s.setContactNumber(sc.nextLong()); 
 
-                        su.UpdateStudent(newRoll, newName, newFacul, newAge, newContact);
-                        su.studentView();
+                System.out.println(StudentDAO.updateStudent(s) ? "Update" : "Failed!");
 
-                        System.out.println("Student Update Successfully!");
-
-                    }
-
-                }                  
-                   if (!found){
-                    System.out.println("Student not found into the list!");
-                    }
-                continue;
             }
 
             case 4 -> {
                 System.out.println("\n\t\t\t\t Delete Student\n");
                 System.out.print("Enter Student ID: ");
-                int dsCheck =  sc.nextInt();
+                int id =  sc.nextInt();
 
-                boolean found = students.removeIf(s -> s.id == dsCheck);
-
-                if(found){
-                    System.out.println("Student Delete succesfully!");
-                } else {
-                    System.out.println("Student not found!");
-                }
+                System.out.println(StudentDAO.deleteStudent(id) ? "Delete" : "Failed!");
                 continue;
             }
 
             case 5 -> {
-                System.out.println("Thank you for use!");
-                    System.exit(0);
-            }       
+                List<Student> all = StudentDAO.getAllStudent();
+                all.forEach(Student::print);
+            }     
+
+            case 6 -> {
+                System.out.println("Thankyou for use!");
+                System.exit(0);
+            }  
           }
-        sc.close();
         }
     }
 }
